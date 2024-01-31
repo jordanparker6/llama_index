@@ -1,11 +1,12 @@
 """Hierarchical node parser."""
 
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Callable, Dict, List, Optional, Sequence
 
 from llama_index.bridge.pydantic import Field
 from llama_index.callbacks.base import CallbackManager
 from llama_index.callbacks.schema import CBEventType, EventPayload
 from llama_index.node_parser.interface import NodeParser
+from llama_index.node_parser.node_utils import default_id_func
 from llama_index.node_parser.text.sentence import SentenceSplitter
 from llama_index.schema import BaseNode, Document, NodeRelationship
 from llama_index.utils import get_tqdm_iterable
@@ -84,9 +85,10 @@ class HierarchicalNodeParser(NodeParser):
         include_metadata: bool = True,
         include_prev_next_rel: bool = True,
         callback_manager: Optional[CallbackManager] = None,
+        id_func: Optional[Callable[[int, Document], str]] = None,
     ) -> "HierarchicalNodeParser":
         callback_manager = callback_manager or CallbackManager([])
-
+        id_func = id_func or default_id_func
         if node_parser_ids is None:
             if chunk_sizes is None:
                 chunk_sizes = [2048, 512, 128]
@@ -100,6 +102,7 @@ class HierarchicalNodeParser(NodeParser):
                     chunk_overlap=chunk_overlap,
                     include_metadata=include_metadata,
                     include_prev_next_rel=include_prev_next_rel,
+                    id_func=id_func,
                 )
         else:
             if chunk_sizes is not None:
@@ -116,6 +119,7 @@ class HierarchicalNodeParser(NodeParser):
             include_metadata=include_metadata,
             include_prev_next_rel=include_prev_next_rel,
             callback_manager=callback_manager,
+            id_func=id_func,
         )
 
     @classmethod
